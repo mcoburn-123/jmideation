@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Joanna & Malik | The Blend Board</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Fraunces', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            canopy: {
+              950: '#061814',
+              900: '#0b2620',
+              800: '#113a31',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #061814;
+      background-image: 
+        radial-gradient(at 10% 15%, rgba(20, 83, 45, 0.45) 0px, transparent 50%),
+        radial-gradient(at 85% 20%, rgba(13, 148, 136, 0.3) 0px, transparent 55%),
+        radial-gradient(at 50% 85%, rgba(6, 78, 59, 0.5) 0px, transparent 60%),
+        radial-gradient(at 90% 90%, rgba(217, 119, 6, 0.12) 0px, transparent 45%);
+      background-attachment: fixed;
+    }
+
+    .glass-column {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.11);
+      border-color: rgba(94, 234, 212, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .glass-modal {
+      background: rgba(11, 38, 32, 0.92);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65);
+    }
+
+    .dragging {
+      opacity: 0.4;
+      transform: scale(0.98);
+      border-color: #2dd4bf !important;
+    }
+
+    .drag-over {
+      background: rgba(45, 212, 191, 0.08);
+      border-color: rgba(45, 212, 191, 0.4);
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(6, 24, 20, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(45, 212, 191, 0.25);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(45, 212, 191, 0.45);
+    }
+  </style>
+</head>
+<body class="text-emerald-50 font-sans min-h-screen selection:bg-teal-500/30 selection:text-teal-200 pb-16">
+
+  <!-- Decorative ambient top bar -->
+  <div class="h-1.5 w-full bg-gradient-to-r from-emerald-600 via-teal-400 to-amber-500/70"></div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12">
+    
+    <!-- Header Section -->
+    <header class="glass-column rounded-3xl p-6 sm:p-8 mb-8 sm:mb-10 relative overflow-hidden">
+      <div class="absolute -right-12 -top-12 w-48 h-48 bg-teal-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/20 text-emerald-300 text-xs font-medium tracking-wider uppercase mb-3">
+            <span class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
+            Permaculture • Water • Ethnobotany • Outcome Engine
+          </div>
+          <h1 class="font-serif text-3xl sm:text-5xl font-semibold tracking-tight text-white">
+            Joanna & Malik <span class="text-teal-400 font-light mx-1">|</span> The Blend Board
+          </h1>
+          <p class="font-serif italic text-emerald-200/80 text-base sm:text-lg mt-2 max-w-2xl">
+            "Holding things up against the permaculture principles when we need clarity."
+          </p>
+        </div>
+
+        <!-- Controls & Nav Buttons -->
+        <div class="flex flex-wrap items-center gap-3">
+          <button 
+            id="openInstructionsBtn"
+            class="px-4 py-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-400/30 text-xs font-semibold text-teal-200 transition cursor-pointer flex items-center gap-2"
+          >
+            <span>📖 Instructions & Guide</span>
+          </button>
+          <button 
+            id="exportMdBtn"
+            class="px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/30 text-xs font-semibold text-amber-200 transition cursor-pointer flex items-center gap-2"
+          >
+            <span>⬇ Export Markdown</span>
+          </button>
+          <div class="relative flex-grow sm:flex-grow-0">
+            <input 
+              type="text" 
+              id="searchInput" 
+              placeholder="Filter cards or tags..." 
+              class="w-full sm:w-44 bg-black/25 border border-white/15 rounded-xl px-4 py-2 text-sm text-emerald-50 placeholder-emerald-200/40 focus:outline-none focus:border-teal-400/60 transition"
+            />
+          </div>
+          <button 
+            id="resetBtn"
+            title="Reset board state and card positions"
+            class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-emerald-200/80 hover:text-white transition cursor-pointer"
+          >
+            Reset View
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Helper Bar -->
+    <div class="flex items-center justify-between text-xs text-emerald-300/60 px-2 mb-4">
+      <span>💡 Drag cards into Column 3 (Action Tracker) to trigger outcome reflections, or leave notes in Column 4 (Feedback & Notes).</span>
+      <span class="hidden sm:inline">Outcome Engine Active</span>
+    </div>
+
+    <!-- Kanban Grid (4 Columns) -->
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 items-start">
+
+      <!-- COLUMN 1: Core Themes -->
+      <section class="glass-column rounded-3xl p-5 sm:p-6 flex flex-col gap-5" data-column="col-1">
+        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-300">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4.97 0-9-4.03-9-9 0-6.5 9-10 9-10s9 3.5 9 10c0 4.97-4.03 9-9 9zm0 0V11"></path>
+              </svg>
+            </span>
+            <h2 class="font-serif text-lg font-semibold text-white tracking-wide">Core Themes</h2>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-white/5 text-emerald-300/80 border border-white/10">01</span>
+        </div>
+
+        <div class="dropzone flex flex-col gap-5 min-h-[120px]" id="col-1">
+          
+          <!-- Card: Core Vision -->
+          <article class="glass-card rounded-2xl p-5 cursor-grab active:cursor-grabbing" draggable="true" data-id="card-vision">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-md border border-emerald-400/20">
+                Foundation
+              </span>
+            </div>
+            <h3 class="font-serif text-lg font-semibold text-white mb-3">Core Vision</h3>
+            <ul class="space-y-3 text-sm text-emerald-100/90 leading-relaxed">
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0"></span>
+                <span><strong class="text-white font-semibold">Sense of Belonging (SOB)</strong> via land/practice.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0"></span>
+                <span><strong class="text-white font-semibold">Intersections</strong> of field biology, Indigenous medicine, and traditional practices.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0"></span>
+                <span><strong class="text-white font-semibold">Actionable Impact</strong> (filling gaps via public education/immersions).</span>
+              </li>
+            </ul>
+          </article>
+
+          <!-- Card: Water as the Thread -->
+          <article class="glass-card rounded-2xl p-5 cursor-grab active:cursor-grabbing relative overflow-hidden" draggable="true" data-id="card-water">
+            <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-teal-400/10 rounded-full blur-xl pointer-events-none"></div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-teal-300 bg-teal-500/15 px-2.5 py-0.5 rounded-md border border-teal-400/20">
+                Elemental Thread
+              </span>
+            </div>
+            <h3 class="font-serif text-lg font-semibold text-white mb-2">Water as the Thread</h3>
+            <p class="text-sm text-emerald-100/90 leading-relaxed mb-4">
+              Inspired by the Amazon's <span class="italic text-teal-200 font-serif">"liquid territory."</span>
+            </p>
+            <div class="flex flex-wrap gap-2 pt-1">
+              <button class="tag-pill text-xs px-3 py-1 rounded-full bg-teal-500/20 hover:bg-teal-500/35 text-teal-200 border border-teal-400/30 transition cursor-pointer">
+                #Breathwork
+              </button>
+              <button class="tag-pill text-xs px-3 py-1 rounded-full bg-teal-500/20 hover:bg-teal-500/35 text-teal-200 border border-teal-400/30 transition cursor-pointer">
+                #Natural Cycles
+              </button>
+              <button class="tag-pill text-xs px-3 py-1 rounded-full bg-teal-500/20 hover:bg-teal-500/35 text-teal-200 border border-teal-400/30 transition cursor-pointer">
+                #Riverine Connection
+              </button>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- COLUMN 2: Structural & Anchors -->
+      <section class="glass-column rounded-3xl p-5 sm:p-6 flex flex-col gap-5" data-column="col-2">
+        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-teal-500/20 border border-teal-400/30 text-teal-300">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v6m0 0a3 3 0 100 6 3 3 0 000-6zm-7 8a7 7 0 0014 0M5 16H3m18 0h-2"></path>
+              </svg>
+            </span>
+            <h2 class="font-serif text-lg font-semibold text-white tracking-wide">Structural & Anchors</h2>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-white/5 text-teal-300/80 border border-white/10">02</span>
+        </div>
+
+        <div class="dropzone flex flex-col gap-5 min-h-[120px]" id="col-2">
+
+          <!-- Card: The Riverine Anchor -->
+          <article class="glass-card rounded-2xl p-5 cursor-grab active:cursor-grabbing" draggable="true" data-id="card-riverine">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded-md border border-cyan-400/20">
+                Research & Precedent
+              </span>
+            </div>
+            <h3 class="font-serif text-lg font-semibold text-white mb-3">The Riverine Anchor</h3>
+            <ul class="space-y-3 text-sm text-emerald-100/90 leading-relaxed">
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-teal-400 mt-2 shrink-0"></span>
+                <span>Grounded in the <strong class="text-white font-semibold">CAP JULIO paper</strong>.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-teal-400 mt-2 shrink-0"></span>
+                <span><strong class="text-white font-semibold">Systemic precedents:</strong> Brazil's floating clinics & 50-day visit cycles.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-teal-400 mt-2 shrink-0"></span>
+                <span><strong class="text-white font-semibold">Integration</strong> with shamans, healers, and midwives.</span>
+              </li>
+            </ul>
+          </article>
+
+          <!-- Card: Structural Model -->
+          <article class="glass-card rounded-2xl p-5 cursor-grab active:cursor-grabbing" draggable="true" data-id="card-structural">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-md border border-emerald-400/20">
+                Architecture
+              </span>
+            </div>
+            <h3 class="font-serif text-lg font-semibold text-white mb-3">Structural Model</h3>
+            <div class="space-y-3 text-sm text-emerald-100/90 leading-relaxed">
+              <div class="p-3 rounded-xl bg-black/20 border border-white/5">
+                <div class="font-semibold text-teal-200 mb-0.5">The "Bring Domain" Team Model</div>
+                <div class="text-xs text-emerald-100/75">Everyone brings their distinct strong suit.</div>
+              </div>
+              <div class="p-3 rounded-xl bg-black/20 border border-white/5">
+                <div class="font-semibold text-teal-200 mb-0.5">Entity Exploration</div>
+                <div class="text-xs text-emerald-100/75">Nonprofit vs. LLC vs. Hybrid.</div>
+              </div>
+              <div class="p-3 rounded-xl bg-black/20 border border-white/5">
+                <div class="font-semibold text-teal-200 mb-0.5">Active Integration</div>
+                <div class="text-xs text-emerald-100/75">UIUC teaching + Rhythm Seed + 123 Footprint.</div>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- COLUMN 3: Action Tracker -->
+      <section class="glass-column rounded-3xl p-5 sm:p-6 flex flex-col gap-5" data-column="col-3">
+        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/30 text-amber-300">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </span>
+            <h2 class="font-serif text-lg font-semibold text-white tracking-wide">Action Tracker</h2>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-white/5 text-amber-300/80 border border-white/10">03</span>
+        </div>
+
+        <div class="dropzone flex flex-col gap-5 min-h-[120px]" id="col-3">
+
+          <!-- Card: To Send -->
+          <article class="glass-card rounded-2xl p-5 cursor-grab active:cursor-grabbing" draggable="true" data-id="card-send">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded-md border border-amber-400/20">
+                Outbound Shareables
+              </span>
+              <span class="text-xs text-emerald-200/60" data-counter="send">0/3 done</span>
+            </div>
+            <h3 class="font-serif text-lg font-semibold text-white mb-3">To Send</h3>
+            <div class="space-y-2.5 text-sm">
+              <label class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white/5 transition cursor-pointer select-none">
+                <input type="checkbox" data-group="send" class="task-check mt-1 w-4 h-4 rounded border-white/30 bg-black/30 text-teal-500 focus:ring-teal-400/40" />
+                <span class="text-emerald-100/90 leading-snug">Posted Up / AG Composting pitch</span>
+              </label>
+              <label class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white/5 transition cursor-pointer select-none">
+                <input type="checkbox" data-group="send" class="task-check mt-1 w-4 h-4 rounded border-white/30 bg-black/30 text-teal-500 focus:ring-teal-400/40" />
+                <span class="text-emerald-100/90 leading-snug"><em class="font-serif text-white">Weeds and What They Tell</em> (Pfeiffer) & Doctrine of Signatures primer</span>
+              </label>
+              <label class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white/5 transition cursor-pointer select-none">
+                <input type="checkbox" data-group="send" class="task-check mt-1 w-4 h-4 rounded border-white/30 bg-black/30 text-teal-500 focus:ring-teal-400/40" />
+                <span class="text-emerald-100/90 leading-snug">Pat's Oaxaca career path</span>
+              </label>
+            </div>
+          </article>
+
+          <!-- Card: To Research & Ask -->
+          <article class="glass-card rounded-2xl p-5 cursor-grab active:cursor-grabbing" draggable="true" data-id="card-research">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-teal-300 bg-teal-500/15 px-2.5 py-0.5 rounded-md border border-teal-400/20">
+                Inquiry & Discovery
+              </span>
+              <span class="text-xs text-emerald-200/60" data-counter="research">0/3 done</span>
+            </div>
+            <h3 class="font-serif text-lg font-semibold text-white mb-3">To Research & Ask</h3>
+            <div class="space-y-2.5 text-sm">
+              <label class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white/5 transition cursor-pointer select-none">
+                <input type="checkbox" data-group="research" class="task-check mt-1 w-4 h-4 rounded border-white/30 bg-black/30 text-teal-500 focus:ring-teal-400/40" />
+                <span class="text-emerald-100/90 leading-snug">Evanston Grows & local Indigenous groups</span>
+              </label>
+              <label class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white/5 transition cursor-pointer select-none">
+                <input type="checkbox" data-group="research" class="task-check mt-1 w-4 h-4 rounded border-white/30 bg-black/30 text-teal-500 focus:ring-teal-400/40" />
+                <span class="text-emerald-100/90 leading-snug">History of Brazil × UIUC connection</span>
+              </label>
+              <label class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white/5 transition cursor-pointer select-none">
+                <input type="checkbox" data-group="research" class="task-check mt-1 w-4 h-4 rounded border-white/30 bg-black/30 text-teal-500 focus:ring-teal-400/40" />
+                <span class="text-emerald-100/90 leading-snug">Ask about meditation in class, Amazon doc, and clarify Pat, Nati, and Josh</span>
+              </label>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- COLUMN 4: Feedback & Notes -->
+      <section class="glass-column rounded-3xl p-5 sm:p-6 flex flex-col gap-5" data-column="col-4">
+        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-400/30 text-purple-300">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+              </svg>
+            </span>
+            <h2 class="font-serif text-lg font-semibold text-white tracking-wide">Feedback & Notes</h2>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-white/5 text-purple-300/80 border border-white/10">04</span>
+        </div>
+
+        <div class="dropzone flex flex-col gap-5 min-h-[120px]" id="col-4">
+
+          <!-- Card: Feedback Input Card -->
+          <article class="glass-card rounded-2xl p-5" data-id="card-feedback-hub">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-purple-300 bg-purple-500/15 px-2.5 py-0.5 rounded-md border border-purple-400/20">
+                Collaborative Log
+              </span>
+            </div>
+            <h3 class="font-serif text-lg font-semibold text-white mb-2">Leave Feedback / Note</h3>
+            <p class="text-xs text-emerald-200/70 mb-4 leading-relaxed">
+              Capture quick thoughts, ideas, or feedback between Joanna and Malik.
+            </p>
+            
+            <div class="space-y-3">
+              <textarea 
+                id="feedbackInput"
+                rows="3"
+                placeholder="Type a new feedback note or synthesis..."
+                class="w-full bg-black/30 border border-white/20 rounded-xl p-3 text-xs text-emerald-50 placeholder-emerald-200/40 focus:outline-none focus:border-purple-400/80 transition resize-none"
+              ></textarea>
+              <button 
+                id="addFeedbackBtn"
+                class="w-full py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/35 border border-purple-400/40 text-purple-200 text-xs font-semibold transition cursor-pointer"
+              >
+                + Add Note to Board
+              </button>
+            </div>
+          </article>
+
+          <!-- Dynamic Container for Added Feedback Cards -->
+          <div id="dynamicFeedbackList" class="flex flex-col gap-4">
+            <!-- Populated via localStorage -->
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- INSTRUCTIONS MODAL -->
+  <div id="instructionsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="glass-modal rounded-3xl max-w-2xl w-full p-6 sm:p-8 transform scale-95 transition-transform duration-300 relative overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="absolute -right-12 -top-12 w-44 h-44 bg-teal-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/10 shrink-0">
+        <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-400/30 text-teal-300 text-xs font-medium tracking-wider uppercase">
+          <span>📖 Guide & Navigation Manual</span>
+        </div>
+        <button id="closeInstructionsX" class="text-emerald-200/60 hover:text-white text-lg font-bold cursor-pointer">✕</button>
+      </div>
+
+      <h3 class="font-serif text-2xl font-semibold text-white mb-2 shrink-0">How to Use The Blend Board</h3>
+      <p class="text-xs sm:text-sm text-emerald-200/80 mb-5 leading-relaxed shrink-0">
+        Designed for Joanna & Malik to hold project streams against permaculture principles, water as a thread, and actionable impact.
+      </p>
+
+      <div class="overflow-y-auto pr-2 space-y-5 flex-grow mb-6 text-sm text-emerald-100/90 leading-relaxed">
+        <div class="p-4 rounded-2xl bg-black/25 border border-white/10 space-y-2">
+          <h4 class="font-semibold text-teal-200 font-serif text-base">🌱 1. Core Themes (Column 1)</h4>
+          <p class="text-xs text-emerald-100/80">Establishes the foundation: Sense of Belonging (SOB) via land practice, field biology x Indigenous medicine intersections, and the Amazonian "liquid territory" water thread.</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-black/25 border border-white/10 space-y-2">
+          <h4 class="font-semibold text-teal-200 font-serif text-base">⚓ 2. Structural & Anchors (Column 2)</h4>
+          <p class="text-xs text-emerald-100/80">Holds precedents like the CAP JULIO paper, Brazilian floating clinic visit cycles, team models, and entity structures (Nonprofit vs. LLC vs. Hybrid).</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-black/25 border border-white/10 space-y-2">
+          <h4 class="font-semibold text-teal-200 font-serif text-base">✨ 3. Action Tracker & Outcome Engine (Column 3)</h4>
+          <p class="text-xs text-emerald-100/80">When you drag any card from Columns 1 or 2 into this column, an <strong>Outcome Engine Modal</strong> automatically opens, presenting multiple-choice tactical paths and projected downstream results.</p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-black/25 border border-white/10 space-y-2">
+          <h4 class="font-semibold text-teal-200 font-serif text-base">💬 4. Feedback & Notes (Column 4)</h4>
+          <p class="text-xs text-emerald-100/80">Use the built-in feedback card to type and pin live thoughts, meeting notes, or collaborative reflections directly to the board. All notes and outcome logs persist in your browser session and can be exported instantly to Markdown.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end pt-4 border-t border-white/10 shrink-0">
+        <button 
+          id="closeInstructionsBtn"
+          class="px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-canopy-950 font-semibold text-sm transition shadow-lg shadow-teal-500/20 cursor-pointer"
+        >
+          Got It, Let's Build
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OUTCOME ENGINE MODAL (Multi-Choice & Downstream Outcomes) -->
+  <div id="outcomeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="glass-modal rounded-3xl max-w-xl w-full p-6 sm:p-8 transform scale-95 transition-transform duration-300 relative overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="absolute -right-12 -top-12 w-40 h-40 bg-teal-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/10 shrink-0">
+        <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-400/30 text-teal-300 text-xs font-medium tracking-wider uppercase">
+          <span>✨ Action Triggered: Potential Outcomes</span>
+        </div>
+        <span id="modalCardBadge" class="text-xs font-mono text-emerald-200/60">Column 03</span>
+      </div>
+
+      <h3 id="modalCardTitle" class="font-serif text-2xl font-semibold text-white mb-2 shrink-0">Card Moved to Action Tracker</h3>
+      <p class="text-xs sm:text-sm text-emerald-200/80 mb-5 leading-relaxed shrink-0">
+        Select the tactical approach below to project potential downstream outcomes, partnership alignments, and structural results.
+      </p>
+
+      <div class="overflow-y-auto pr-1 space-y-6 flex-grow mb-6">
+        <div>
+          <label class="block text-xs font-semibold text-teal-300 uppercase tracking-wider mb-3">1. Select Primary Execution Path:</label>
+          <div id="mcOptionsContainer" class="space-y-2.5"></div>
+        </div>
+
+        <div id="outcomesSection" class="p-4 rounded-2xl bg-teal-950/40 border border-teal-500/20 transition-all">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-amber-300">Projected Downstream Outcomes</h4>
+          </div>
+          <div id="outcomesContent" class="text-sm text-emerald-100/90 space-y-2 leading-relaxed"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-4 border-t border-white/10 shrink-0">
+        <span class="text-xs text-emerald-300/50 italic">Selections are saved to your session log.</span>
+        <button 
+          id="modalCloseBtn"
+          class="px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-canopy-950 font-semibold text-sm transition shadow-lg shadow-teal-500/20 cursor-pointer"
+        >
+          Confirm & Log Outcome
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script: Interactivity, Drag-and-Drop, Instructions Modal, Feedback Column, Outcomes, and Markdown Export -->
+  <script>
+    // 1. Checklist strike-through & counter updates
+    const checkboxes = document.querySelectorAll('.task-check');
+    
+    function updateCounters() {
+      ['send', 'research'].forEach(group => {
+        const groupBoxes = document.querySelectorAll(`.task-check[data-group="${group}"]`);
+        const checkedBoxes = document.querySelectorAll(`.task-check[data-group="${group}"]:checked`);
+        const counterEl = document.querySelector(`[data-counter="${group}"]`);
+        if (counterEl) {
+          counterEl.textContent = `${checkedBoxes.length}/${groupBoxes.length} done`;
+        }
+      });
+    }
+
+    checkboxes.forEach((box, idx) => {
+      const saved = localStorage.getItem(`blendboard_check_${idx}`);
+      if (saved === 'true') {
+        box.checked = true;
+        box.nextElementSibling.classList.add('line-through', 'opacity-50');
+      }
+
+      box.addEventListener('change', () => {
+        const textSpan = box.nextElementSibling;
+        if (box.checked) {
+          textSpan.classList.add('line-through', 'opacity-50');
+        } else {
+          textSpan.classList.remove('line-through', 'opacity-50');
+        }
+        localStorage.setItem(`blendboard_check_${idx}`, box.checked);
+        updateCounters();
+      });
+    });
+    updateCounters();
+
+    // 2. Instructions Modal Handlers
+    const instructionsModal = document.getElementById('instructionsModal');
+    const openInstructionsBtn = document.getElementById('openInstructionsBtn');
+    const closeInstructionsBtn = document.getElementById('closeInstructionsBtn');
+    const closeInstructionsX = document.getElementById('closeInstructionsX');
+
+    function openInstructions() {
+      instructionsModal.classList.remove('opacity-0', 'pointer-events-none');
+      instructionsModal.querySelector('.glass-modal').classList.remove('scale-95');
+      instructionsModal.querySelector('.glass-modal').classList.add('scale-100');
+    }
+
+    function closeInstructions() {
+      instructionsModal.querySelector('.glass-modal').classList.remove('scale-100');
+      instructionsModal.querySelector('.glass-modal').classList.add('scale-95');
+      instructionsModal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    openInstructionsBtn.addEventListener('click', openInstructions);
+    closeInstructionsBtn.addEventListener('click', closeInstructions);
+    closeInstructionsX.addEventListener('click', closeInstructions);
+    instructionsModal.addEventListener('click', (e) => {
+      if (e.target === instructionsModal) closeInstructions();
+    });
+
+    // 3. Feedback Column & LocalStorage Persistence
+    const feedbackInput = document.getElementById('feedbackInput');
+    const addFeedbackBtn = document.getElementById('addFeedbackBtn');
+    const dynamicFeedbackList = document.getElementById('dynamicFeedbackList');
+
+    let savedFeedback = JSON.parse(localStorage.getItem('blendboard_feedback') || '[]');
+
+    function renderFeedback() {
+      dynamicFeedbackList.innerHTML = '';
+      savedFeedback.forEach((item, index) => {
+        const art = document.createElement('article');
+        art.className = "glass-card rounded-2xl p-4 relative group";
+        art.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-purple-300 bg-purple-500/15 px-2 py-0.5 rounded border border-purple-400/20">
+              Note #${index + 1}
+            </span>
+            <button onclick="deleteFeedback(${index})" class="text-xs text-red-300/60 hover:text-red-300 transition cursor-pointer">Delete</button>
+          </div>
+          <p class="text-xs text-emerald-50 leading-relaxed whitespace-pre-wrap">${item}</p>
+        `;
+        dynamicFeedbackList.appendChild(art);
+      });
+    }
+
+    window.deleteFeedback = function(index) {
+      savedFeedback.splice(index, 1);
+      localStorage.setItem('blendboard_feedback', JSON.stringify(savedFeedback));
+      renderFeedback();
+    };
+
+    addFeedbackBtn.addEventListener('click', () => {
+      const val = feedbackInput.value.trim();
+      if (!val) return;
+      savedFeedback.unshift(val);
+      localStorage.setItem('blendboard_feedback', JSON.stringify(savedFeedback));
+      feedbackInput.value = '';
+      renderFeedback();
+    });
+
+    renderFeedback();
+
+    // 4. Search & Tag Filtering
+    const searchInput = document.getElementById('searchInput');
+    const cards = document.querySelectorAll('.glass-card');
+    const tagPills = document.querySelectorAll('.tag-pill');
+
+    function filterCards(query) {
+      const q = query.toLowerCase().trim();
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    searchInput.addEventListener('input', (e) => filterCards(e.target.value));
+
+    tagPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        const tagText = pill.innerText.replace('#', '');
+        if (searchInput.value === tagText) {
+          searchInput.value = '';
+          filterCards('');
+        } else {
+          searchInput.value = tagText;
+          filterCards(tagText);
+        }
+      });
+    });
+
+    // 5. Multi-Choice Data & Projected Outcomes per Card ID
+    const cardOutcomeData = {
+      'card-vision': {
+        title: "Core Vision",
+        choices: [
+          {
+            id: "v1",
+            label: "Launch public ethnobotany immersion series in Chicago neighborhoods",
+            outcomes: "• Fosters immediate Sense of Belonging (SOB) via hands-on land stewardship.\n• Bridges field biology with traditional medicine for urban practitioners.\n• Establishes pilot cohorts for public education grants."
+          },
+          {
+            id: "v2",
+            label: "Integrate Amazon riverine pedagogy into UIUC academic curriculum",
+            outcomes: "• Connects academic framework directly with grassroots regenerative practice.\n• Generates institutional backing and student research involvement.\n• Validates 'liquid territory' concepts in higher education."
+          },
+          {
+            id: "v3",
+            label: "Publish open-access field guide on Indigenous medicinal plants",
+            outcomes: "• Creates a lasting public resource for bioregional plant knowledge.\n• Amplifies Indigenous voices and traditional plant custodians.\n• Positions 123 Footprint as an educational authority."
+          }
+        ]
+      },
+      'card-water': {
+        title: "Water as the Thread",
+        choices: [
+          {
+            id: "w1",
+            label: "Design riverine breathwork & natural cycle workshops along waterways",
+            outcomes: "• Directly operationalizes the Amazonian 'liquid territory' ethos locally.\n• Deepens somatic and ecological connection to Chicago's shoreline.\n• Attracts somatic practitioners and environmental advocates."
+          },
+          {
+            id: "w2",
+            label: "Partner with Advocates for Morgan Shoal for shoreline restoration immersion",
+            outcomes: "• Strengthens local coalition ties for ecological protection.\n• Integrates breathwork with active shoreline conservation efforts.\n• Directly informs policy and community engagement."
+          },
+          {
+            id: "w3",
+            label: "Produce digital documentary short on urban riverine corridors",
+            outcomes: "• Visualizes the invisible water networks flowing through the city.\n• Broadens audience reach across digital and academic channels.\n• Serves as a powerful outreach tool for funders."
+          }
+        ]
+      },
+      'card-riverine': {
+        title: "The Riverine Anchor",
+        choices: [
+          {
+            id: "r1",
+            label: "Adapt CAP JULIO floating clinic framework for regional Midwest waters",
+            outcomes: "• Establishes a concrete precedent for mobile regenerative care.\n• Bridges indigenous healing practices with modern community health.\n• Creates a scalable blueprint for regional waterways."
+          },
+          {
+            id: "r2",
+            label: "Formalize advisory council of traditional healers, shamans, and midwives",
+            outcomes: "• Ensures ethical grounding and cultural integrity in all programming.\n• Directs traditional wisdom into contemporary wellness frameworks.\n• Builds trusted institutional relationships."
+          },
+          {
+            id: "r3",
+            label: "Establish 50-day seasonal mobile visit and workshop cycles",
+            outcomes: "• Mimics successful international systemic precedents.\n• Creates consistent rhythmic touchpoints for community engagement.\n• Measures long-term impact on participant well-being."
+          }
+        ]
+      },
+      'card-structural': {
+        title: "Structural Model",
+        choices: [
+          {
+            id: "s1",
+            label: "Incorporate a Hybrid Nonprofit / LLC model (Make Some Gold + 123 Footprint)",
+            outcomes: "• Optimizes tax status for both commercial contracting and grant funding.\n• Protects intellectual property while enabling community-funded initiatives.\n• Streamlines federal procurement via SAM.gov registration."
+          },
+          {
+            id: "s2",
+            label: "Execute 'Bring Domain' team model uniting UIUC, Rhythm Seed, and 123 Footprint",
+            outcomes: "• Maximizes each collaborator's core strengths without redundancy.\n• Accelerates project delivery through synchronized workstreams.\n• Fosters cross-sector innovation in regenerative infrastructure."
+          },
+          {
+            id: "s3",
+            label: "Scale commercial waste coordination contracts to fund public programs",
+            outcomes: "• Generates independent revenue streams to subsidize public workshops.\n• Grounds theoretical permaculture in tangible, self-sustaining business operations.\n• Reduces reliance on external philanthropic grants."
+          }
+        ]
+      },
+      'card-send': {
+        title: "To Send",
+        choices: [
+          {
+            id: "send1",
+            label: "Submit Posted Up / AG Composting pitch to municipal stakeholders",
+            outcomes: "• Unlocks potential organic waste processing partnerships in Chicago.\n• Positions 123 Footprint as a key urban composting infrastructure provider.\n• Generates immediate commercial dialogue."
+          },
+          {
+            id: "send2",
+            label: "Distribute 'Weeds and What They Tell' & Doctrine of Signatures primer",
+            outcomes: "• Educates partners on bio-indicator plants and holistic soil health.\n• Sparks interest in upcoming ethnobotany workshops and publications.\n• Deepens shared philosophical alignment among collaborators."
+          },
+          {
+            id: "send3",
+            label: "Finalize and share Pat's Oaxaca career path documentation",
+            outcomes: "• Clarifies international mentorship and traditional craft linkages.\n• Informs curriculum design for upcoming field immersions.\n• Strengthens cross-border cultural exchange networks."
+          }
+        ]
+      },
+      'card-research': {
+        title: "To Research & Ask",
+        choices: [
+          {
+            id: "res1",
+            label: "Map Evanston Grows & local Indigenous tribal history and land ties",
+            outcomes: "• Centers Indigenous sovereignty and historical context in local projects.\n• Identifies collaborative gardening and food sovereignty networks.\n• Ensures respectful engagement with regional tribal custodians."
+          },
+          {
+            id: "res2",
+            label: "Archive history of Brazil × UIUC academic and agricultural exchange",
+            outcomes: "• Uncovers historical institutional precedents for current research.\n• Strengthens university-level funding and grant proposals.\n• Opens doors for international academic partnerships."
+          },
+          {
+            id: "res3",
+            label: "Synthesize notes on classroom meditation, Amazon doc, and key collaborators",
+            outcomes: "• Streamlines team communication regarding Pat, Nati, and Josh.\n• Integrates contemplative practice directly into educational offerings.\n• Clears operational bottlenecks for upcoming production phases."
+          }
+        ]
+      }
+    };
+
+    const defaultOutcomeData = {
+      title: "Action Item",
+      choices: [
+        {
+          id: "d1",
+          label: "Execute immediate tactical review with Joanna and collaborators",
+          outcomes: "• Aligns team priorities on current deliverables.\n• Resolves open questions and establishes clear timelines.\n• Moves project phase forward efficiently."
+        },
+        {
+          id: "d2",
+          label: "Delegate research ownership and schedule follow-up checkpoint",
+          outcomes: "• Distributes workload evenly across team members.\n• Ensures accountability and steady momentum."
+        }
+      ]
+    };
+
+    // 6. Drag & Drop with Multi-Choice Outcome Modal Trigger & State Storing
+    const dropzones = document.querySelectorAll('.dropzone');
+    let draggedCard = null;
+
+    cards.forEach(card => {
+      card.addEventListener('dragstart', () => {
+        draggedCard = card;
+        setTimeout(() => card.classList.add('dragging'), 0);
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        draggedCard = null;
+      });
+    });
+
+    const outcomeModal = document.getElementById('outcomeModal');
+    const mcOptionsContainer = document.getElementById('mcOptionsContainer');
+    const outcomesContent = document.getElementById('outcomesContent');
+    const modalCardTitle = document.getElementById('modalCardTitle');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+    let savedOutcomes = JSON.parse(localStorage.getItem('blendboard_outcomes') || '[]');
+    let activeOutcomeDraft = null;
+
+    function openOutcomeModal(cardId, cardTitleText) {
+      const data = cardOutcomeData[cardId] || defaultOutcomeData;
+      modalCardTitle.textContent = `Outcome Projection: "${cardTitleText}"`;
+      mcOptionsContainer.innerHTML = '';
+
+      const dataset = data.choices;
+
+      activeOutcomeDraft = {
+        card: cardTitleText,
+        choice: dataset[0].label,
+        outcomes: dataset[0].outcomes,
+        timestamp: new Date().toLocaleDateString()
+      };
+
+      dataset.forEach((choice, index) => {
+        const isChecked = index === 0 ? 'checked' : '';
+        const wrapper = document.createElement('label');
+        wrapper.className = `flex items-start gap-3 p-3 rounded-xl border transition cursor-pointer select-none ${isChecked ? 'bg-teal-500/15 border-teal-400/40 text-white' : 'bg-black/20 border-white/10 text-emerald-100/90 hover:bg-white/5'}`;
+        wrapper.innerHTML = `
+          <input type="radio" name="outcomeChoice" value="${choice.id}" ${isChecked} class="mt-1 w-4 h-4 text-teal-500 focus:ring-teal-400 shrink-0" />
+          <span class="text-sm font-medium leading-snug">${choice.label}</span>
+        `;
+        
+        const radio = wrapper.querySelector('input');
+        radio.addEventListener('change', () => {
+          document.querySelectorAll('#mcOptionsContainer label').forEach(l => {
+            l.className = "flex items-start gap-3 p-3 rounded-xl border bg-black/20 border-white/10 text-emerald-100/90 hover:bg-white/5 transition cursor-pointer select-none";
+          });
+          wrapper.className = "flex items-start gap-3 p-3 rounded-xl border bg-teal-500/15 border-teal-400/40 text-white transition cursor-pointer select-none";
+          outcomesContent.innerHTML = choice.outcomes.replace(/\n/g, '<br>');
+          
+          activeOutcomeDraft = {
+            card: cardTitleText,
+            choice: choice.label,
+            outcomes: choice.outcomes,
+            timestamp: new Date().toLocaleDateString()
+          };
+        });
+
+        mcOptionsContainer.appendChild(wrapper);
+      });
+
+      outcomesContent.innerHTML = dataset[0].outcomes.replace(/\n/g, '<br>');
+
+      outcomeModal.classList.remove('opacity-0', 'pointer-events-none');
+      outcomeModal.querySelector('.glass-modal').classList.remove('scale-95');
+      outcomeModal.querySelector('.glass-modal').classList.add('scale-100');
+    }
+
+    function closeOutcomeModal() {
+      outcomeModal.querySelector('.glass-modal').classList.remove('scale-100');
+      outcomeModal.querySelector('.glass-modal').classList.add('scale-95');
+      outcomeModal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    modalCloseBtn.addEventListener('click', () => {
+      if (activeOutcomeDraft) {
+        savedOutcomes.unshift(activeOutcomeDraft);
+        localStorage.setItem('blendboard_outcomes', JSON.stringify(savedOutcomes));
+        activeOutcomeDraft = null;
+      }
+      closeOutcomeModal();
+    });
+
+    outcomeModal.addEventListener('click', (e) => {
+      if (e.target === outcomeModal) {
+        if (activeOutcomeDraft) {
+          savedOutcomes.unshift(activeOutcomeDraft);
+          localStorage.setItem('blendboard_outcomes', JSON.stringify(savedOutcomes));
+          activeOutcomeDraft = null;
+        }
+        closeOutcomeModal();
+      }
+    });
+
+    dropzones.forEach(zone => {
+      zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('drag-over', 'rounded-2xl');
+      });
+
+      zone.addEventListener('dragleave', () => {
+        zone.classList.remove('drag-over', 'rounded-2xl');
+      });
+
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('drag-over', 'rounded-2xl');
+        if (draggedCard) {
+          const sourceColumn = draggedCard.closest('.dropzone').id;
+          const targetColumn = zone.id;
+          
+          zone.appendChild(draggedCard);
+
+          if (targetColumn === 'col-3' && sourceColumn !== 'col-3') {
+            const cardId = draggedCard.getAttribute('data-id');
+            const titleEl = draggedCard.querySelector('h3');
+            const cardTitleText = titleEl ? titleEl.textContent : 'Card';
+            setTimeout(() => {
+              openOutcomeModal(cardId, cardTitleText);
+            }, 150);
+          }
+        }
+      });
+    });
+
+    // 7. Markdown Export Script
+    document.getElementById('exportMdBtn').addEventListener('click', () => {
+      const dateStr = new Date().toISOString().split('T')[0];
+      let md = `# Joanna & Malik | The Blend Board Snapshot\n`;
+      md += `**Exported:** ${new Date().toLocaleString()}\n`;
+      md += `> *"Holding things up against the permaculture principles when we need clarity."*\n\n---\n\n`;
+
+      // 1. Action Tracker Checklist Status
+      md += `## ✅ Action Tracker Status\n\n`;
+      document.querySelectorAll('#col-3 .glass-card').forEach(card => {
+        const title = card.querySelector('h3')?.innerText || 'Action Group';
+        md += `### ${title}\n`;
+        card.querySelectorAll('label').forEach(label => {
+          const isChecked = label.querySelector('input[type="checkbox"]')?.checked;
+          const text = label.querySelector('span')?.innerText.trim();
+          md += `- [${isChecked ? 'x' : ' '}] ${text}\n`;
+        });
+        md += `\n`;
+      });
+
+      // 2. Logged Outcome Projections
+      md += `## ✨ Confirmed Outcome Projections\n\n`;
+      const outcomes = JSON.parse(localStorage.getItem('blendboard_outcomes') || '[]');
+      if (outcomes.length === 0) {
+        md += `*No outcome paths logged yet. Drag a card into Action Tracker to log one.*\n\n`;
+      } else {
+        outcomes.forEach(item => {
+          md += `### ${item.card} (${item.timestamp})\n`;
+          md += `- **Selected Path:** ${item.choice}\n`;
+          md += `- **Projected Downstream Outcomes:**\n`;
+          item.outcomes.split('\n').forEach(line => {
+            md += `  ${line}\n`;
+          });
+          md += `\n`;
+        });
+      }
+
+      // 3. Feedback & Collaborative Notes
+      md += `## 💬 Feedback & Collaborative Notes\n\n`;
+      const notes = JSON.parse(localStorage.getItem('blendboard_feedback') || '[]');
+      if (notes.length === 0) {
+        md += `*No feedback notes pinned yet.*\n`;
+      } else {
+        notes.forEach((note, idx) => {
+          md += `### Note #${notes.length - idx}\n${note}\n\n`;
+        });
+      }
+
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `blend-board-snapshot-${dateStr}.md`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
+
+    // 8. Reset Button
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      localStorage.clear();
+      searchInput.value = '';
+      location.reload();
+    });
+  </script>
+</body>
+</html>
